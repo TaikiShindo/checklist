@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="真道大輝（paulgreen）の自己紹介ページ。ゲームとプログラミングが得意なAI活用者のポートフォリオ。" />
+  <title>真道大輝 | Self Introduction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <span class="nav-logo">PG<span class="accent">.</span></span>
+      <ul class="nav-links">
+        <li><a href="#hero">Top</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#interests">Interests</a></li>
+        <li><a href="#future">Vision</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="メニュー">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section id="hero">
+    <div class="hero-bg">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="orb orb3"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-avatar reveal-up">
+        <!-- SVG Avatar -->
+        <svg viewBox="0 0 240 280" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
+          <!-- Background circle -->
+          <circle cx="120" cy="130" r="110" fill="url(#avatarBg)" />
+          <!-- Body / T-shirt -->
+          <path d="M45 240 Q60 200 90 190 L120 210 L150 190 Q180 200 195 240 Z" fill="#1e293b"/>
+          <!-- Hoodie details -->
+          <path d="M90 190 Q105 215 120 210 Q135 215 150 190" fill="none" stroke="#334155" stroke-width="3"/>
+          <!-- Neck -->
+          <rect x="107" y="172" width="26" height="22" rx="8" fill="#f5c99a"/>
+          <!-- Head -->
+          <ellipse cx="120" cy="148" rx="46" ry="50" fill="#f5c99a"/>
+          <!-- Ears -->
+          <ellipse cx="74" cy="150" rx="8" ry="11" fill="#f0ba8a"/>
+          <ellipse cx="166" cy="150" rx="8" ry="11" fill="#f0ba8a"/>
+          <!-- Hair -->
+          <path d="M76 130 Q80 90 120 86 Q160 90 164 130 Q155 108 120 106 Q85 108 76 130 Z" fill="#1a1a2e"/>
+          <path d="M76 125 Q72 110 76 100 Q80 88 90 84" stroke="#1a1a2e" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M164 125 Q168 110 164 100 Q160 88 150 84" stroke="#1a1a2e" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- Eyes -->
+          <ellipse cx="104" cy="152" rx="9" ry="10" fill="white"/>
+          <ellipse cx="136" cy="152" rx="9" ry="10" fill="white"/>
+          <circle cx="106" cy="154" r="6" fill="#1a1a2e"/>
+          <circle cx="138" cy="154" r="6" fill="#1a1a2e"/>
+          <circle cx="108" cy="152" r="2" fill="white"/>
+          <circle cx="140" cy="152" r="2" fill="white"/>
+          <!-- Eyebrows -->
+          <path d="M96 140 Q104 136 113 139" stroke="#2d1a0e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M127 139 Q136 136 144 140" stroke="#2d1a0e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Smile -->
+          <path d="M108 168 Q120 178 132 168" stroke="#c97745" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Nose -->
+          <path d="M118 158 Q120 165 122 158" stroke="#d4956a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Gradient -->
+          <defs>
+            <radialGradient id="avatarBg" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#0f0c29"/>
+            </radialGradient>
+          </defs>
+          <!-- Tech icons floating -->
+          <text x="30" y="60" font-size="22" opacity="0.5">⌨️</text>
+          <text x="185" y="55" font-size="20" opacity="0.5">🎮</text>
+          <text x="20" y="210" font-size="18" opacity="0.4">🤖</text>
+          <text x="190" y="215" font-size="18" opacity="0.4">💡</text>
+        </svg>
+        <div class="avatar-ring"></div>
+      </div>
+
+      <div class="hero-text reveal-up delay-1">
+        <p class="hero-handle">@paulgreen</p>
+        <h1 class="hero-name">真道 <span class="accent">大輝</span></h1>
+        <p class="hero-tagline">Game Lover &amp; Programming Enthusiast<br>AI × Human Partner</p>
+        <div class="hero-buttons">
+          <a href="#about" class="btn btn-primary" id="btn-about">About Me</a>
+          <a href="#future" class="btn btn-ghost" id="btn-vision">My Vision</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ===== ABOUT ===== -->
+  <section id="about">
+    <div class="container">
+      <h2 class="section-title reveal-up">About <span class="accent">Me</span></h2>
+      <div class="about-grid">
+        <div class="about-card reveal-left" id="card-name">
+          <div class="card-icon">👤</div>
+          <h3>Name</h3>
+          <p><strong>真道大輝</strong><br><span class="muted">Taiki Mashindo</span></p>
+        </div>
+        <div class="about-card reveal-up delay-1" id="card-handle">
+          <div class="card-icon">🎮</div>
+          <h3>Handle</h3>
+          <p><strong>paulgreen</strong><br><span class="muted">ゲーマーとして活動中</span></p>
+        </div>
+        <div class="about-card reveal-right" id="card-skill">
+          <div class="card-icon">⚡</div>
+          <h3>特異なこと</h3>
+          <p><strong>ゲーム</strong><br><span class="muted">戦略・思考力を磨く</span></p>
+        </div>
+      </div>
+
+      <div class="about-bio reveal-up delay-2">
+        <p>
+          ゲームが大好きで、プログラミングへの興味が尽きない。<br>
+          テクノロジーと遊びの交差点に立ち、常に新しいことに挑戦しています。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INTERESTS ===== -->
+  <section id="interests">
+    <div class="container">
+      <h2 class="section-title reveal-up">My <span class="accent">Interests</span></h2>
+      <div class="interests-grid">
+
+        <div class="interest-card reveal-left" id="interest-game">
+          <div class="interest-bg game-bg"></div>
+          <div class="interest-icon">🎮</div>
+          <h3>ゲーム</h3>
+          <p>ゲームを通じて戦略的思考力・瞬発力・問題解決力を磨いています。特異することを生かして新しい世界を切り拓く。</p>
+        </div>
+
+        <div class="interest-card reveal-up delay-1" id="interest-programming">
+          <div class="interest-bg prog-bg"></div>
+          <div class="interest-icon">💻</div>
+          <h3>プログラミング</h3>
+          <p>アイデアをコードで形にする喜びが好きです。この授業を通じて様々なプログラムに挑戦していきます。</p>
+        </div>
+
+        <div class="interest-card reveal-right" id="interest-ai">
+          <div class="interest-bg ai-bg"></div>
+          <div class="interest-icon">🤖</div>
+          <h3>AI</h3>
+          <p>AIは私にとって頼もしいパートナー。共に成長し、相棒のように向き合っていきたいと思っています。</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FUTURE / VISION ===== -->
+  <section id="future">
+    <div class="container">
+      <h2 class="section-title reveal-up">My <span class="accent">Vision</span></h2>
+      <div class="vision-wrap">
+        <div class="vision-timeline">
+
+          <div class="timeline-item reveal-left" id="timeline-1">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h3>AIを使いこなす</h3>
+              <p>AIをツールではなく、パートナーとして活用し、人間とAIが協力し合う未来を体現したい。</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal-right" id="timeline-2">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h3>プログラムへの挑戦</h3>
+              <p>この授業を通じて様々なプログラミングに挑戦し、実践的なスキルを積み上げていく。</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal-left" id="timeline-3">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h3>AIと共に成長</h3>
+              <p>日々進化するAI技術と共に歩み、相棒のように向き合いながら自分自身も進化し続ける。</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="vision-quote reveal-up delay-2">
+          <blockquote>
+            "AIは頼もしいパートナー。<br>共に未来を切り拓いていきたい。"
+          </blockquote>
+          <cite>— 真道大輝 / paulgreen</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer id="footer">
+    <div class="footer-inner">
+      <span class="nav-logo">PG<span class="accent">.</span></span>
+      <p>© 2024 真道大輝 (paulgreen) — All Rights Reserved</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
