@@ -141,6 +141,17 @@ img, svg { display: block; max-width: 100%; }
   background: radial-gradient(ellipse 80% 60% at 50% 20%, #14092e 0%, var(--bg-dark) 70%);
 }
 
+#tetris-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.25; /* 背景として目立ちすぎないように透明度を調整 */
+  pointer-events: none; /* クリックを邪魔しないようにする */
+}
+
 .orb {
   position: absolute;
   border-radius: 50%;
@@ -633,4 +644,178 @@ section:nth-child(even) { background: var(--bg-section); }
 @media (max-width: 480px) {
   .hero-buttons { flex-direction: column; align-items: center; }
   .btn { width: 220px; text-align: center; }
+}
+
+/* =============================================
+   BULLETIN BOARD WIDGET
+   ============================================= */
+.board-widget {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 320px;
+  background: rgba(8, 13, 31, 0.85);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  z-index: 99;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.board-widget.minimized {
+  transform: translateY(calc(100% - 46px));
+}
+
+.board-header {
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.board-header:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.board-header h4 {
+  font-family: var(--font-en);
+  font-size: 0.95rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.board-header h4::before {
+  content: '💬';
+  font-size: 1.1rem;
+}
+
+#board-toggle {
+  background: none;
+  border: none;
+  color: var(--text-main);
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0 5px;
+  font-size: 1rem;
+}
+
+.board-body {
+  display: flex;
+  flex-direction: column;
+  height: 350px;
+}
+
+.board-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.board-messages::-webkit-scrollbar { width: 4px; }
+.board-messages::-webkit-scrollbar-track { background: transparent; }
+.board-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+.board-msg {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease;
+  word-break: break-word;
+}
+
+.board-msg .msg-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.board-msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.board-msg-name {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--accent3);
+}
+
+.board-msg-text {
+  display: block;
+  font-size: 0.9rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.board-form {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
+  align-items: stretch;
+}
+
+.board-inputs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.board-inputs input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.board-inputs input:focus {
+  border-color: var(--accent);
+}
+
+.board-form button {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0 16px;
+  margin-left: 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.board-form button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px var(--glow);
+}
+
+@media (max-width: 768px) {
+  .board-widget {
+    left: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px);
+  }
 }

@@ -133,3 +133,184 @@ if (tagline) {
   // Start after brief delay
   setTimeout(typeEffect, 1200);
 }
+
+// ---- Tetris Background Animation ----
+const canvas = document.getElementById('tetris-canvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  let width, height;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Tetromino colors and shapes
+  const colors = ['#00FFFF', '#0000FF', '#FFA500', '#FFFF00', '#00FF00', '#800080', '#FF0000'];
+  const shapes = [
+    [[1, 1, 1, 1]], // I
+    [[1, 0, 0], [1, 1, 1]], // J
+    [[0, 0, 1], [1, 1, 1]], // L
+    [[1, 1], [1, 1]], // O
+    [[0, 1, 1], [1, 1, 0]], // S
+    [[0, 1, 0], [1, 1, 1]], // T
+    [[1, 1, 0], [0, 1, 1]]  // Z
+  ];
+
+  class Tetromino {
+    constructor() {
+      this.reset(true);
+    }
+
+    reset(initial = false) {
+      this.shape = shapes[Math.floor(Math.random() * shapes.length)];
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.size = Math.random() * 12 + 10; // Block size
+      this.x = Math.random() * width;
+      this.y = initial ? Math.random() * height : -100;
+      this.speedY = Math.random() * 1.5 + 0.5;
+      this.speedX = (Math.random() - 0.5) * 0.5;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+    }
+
+    update() {
+      this.y += this.speedY;
+      this.x += this.speedX;
+      this.rotation += this.rotationSpeed;
+      if (this.y > height + 100) {
+        this.reset();
+      }
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.fillStyle = this.color;
+      ctx.globalAlpha = 0.8;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = this.color;
+      
+      const cols = this.shape[0].length;
+      const rows = this.shape.length;
+      const offsetX = -(cols * this.size) / 2;
+      const offsetY = -(rows * this.size) / 2;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (this.shape[r][c]) {
+            ctx.fillRect(offsetX + c * this.size, offsetY + r * this.size, this.size - 1, this.size - 1);
+          }
+        }
+      }
+      ctx.restore();
+    }
+  }
+
+  // 画面に降らせるブロックの数
+  const tetrominoes = Array.from({ length: 35 }, () => new Tetromino());
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    tetrominoes.forEach(t => {
+      t.update();
+      t.draw();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ---- Bulletin Board Widget ----
+const boardWidget = document.getElementById('bulletin-board');
+const boardToggle = document.getElementById('board-toggle');
+const boardHeader = document.querySelector('.board-header');
+const boardForm = document.getElementById('board-form');
+const boardInput = document.getElementById('board-input');
+const boardName = document.getElementById('board-name');
+const boardMessages = document.getElementById('board-messages');
+
+if (boardWidget) {
+  // Toggle visibility
+  boardHeader.addEventListener('click', () => {
+    boardWidget.classList.toggle('minimized');
+    boardToggle.textContent = boardWidget.classList.contains('minimized') ? '□' : '_';
+  });
+
+  // Load messages from localStorage
+  const loadMessages = () => {
+    const msgs = JSON.parse(localStorage.getItem('pb_messages') || '[]');
+    boardMessages.innerHTML = '';
+    msgs.forEach(msg => appendMessage(msg.name || 'システム', msg.text, msg.time));
+    scrollToBottom();
+  };
+
+  const saveMessage = (name, text, time) => {
+    const msgs = JSON.parse(localStorage.getItem('pb_messages') || '[]');
+    msgs.push({ name, text, time });
+    if (msgs.length > 50) msgs.shift(); // Keep last 50 messages
+    localStorage.setItem('pb_messages', JSON.stringify(msgs));
+  };
+
+  const getAnonymousId = () => {
+    let id = parseInt(localStorage.getItem('pb_anon_id') || '1', 10);
+    localStorage.setItem('pb_anon_id', (id + 1).toString());
+    return id;
+  };
+
+  const appendMessage = (name, text, time) => {
+    const div = document.createElement('div');
+    div.className = 'board-msg';
+    div.innerHTML = `
+      <div class="board-msg-header">
+        <span class="board-msg-name"></span>
+        <span class="msg-time">${time}</span>
+      </div>
+      <span class="board-msg-text"></span>
+    `;
+    div.querySelector('.board-msg-name').textContent = name;
+    div.querySelector('.board-msg-text').textContent = text;
+    boardMessages.appendChild(div);
+  };
+
+  const scrollToBottom = () => {
+    boardMessages.scrollTop = boardMessages.scrollHeight;
+  };
+
+  boardForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = boardInput.value.trim();
+    let name = boardName.value.trim();
+    
+    if (!text) return;
+    
+    if (!name) {
+      name = `名無しさん #${getAnonymousId()}`;
+    }
+    
+    const now = new Date();
+    const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    appendMessage(name, text, time);
+    saveMessage(name, text, time);
+    scrollToBottom();
+    boardInput.value = '';
+    // Optional: boardName is intentionally left filled so they don't have to type it again.
+  });
+
+  // Initial load
+  loadMessages();
+  
+  // Add an initial welcome message if empty
+  if (boardMessages.children.length === 0) {
+    const welcomeText = 'こんにちは！掲示板へようこそ。何かメッセージを残していってください✨';
+    const now = new Date();
+    const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const initialName = 'システム';
+    appendMessage(initialName, welcomeText, time);
+    saveMessage(initialName, welcomeText, time);
+  }
+}

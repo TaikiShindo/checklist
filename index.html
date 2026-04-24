@@ -31,6 +31,7 @@
   <!-- ===== HERO ===== -->
   <section id="hero">
     <div class="hero-bg">
+      <canvas id="tetris-canvas"></canvas>
       <div class="orb orb1"></div>
       <div class="orb orb2"></div>
       <div class="orb orb3"></div>
@@ -215,6 +216,26 @@
       <p>© 2024 paulgreen — All Rights Reserved</p>
     </div>
   </footer>
+
+  <!-- ===== BULLETIN BOARD WIDGET ===== -->
+  <div id="bulletin-board" class="board-widget">
+    <div class="board-header">
+      <h4>Message Board</h4>
+      <button id="board-toggle" aria-label="掲示板を切り替え">_</button>
+    </div>
+    <div class="board-body">
+      <div id="board-messages" class="board-messages">
+        <!-- Messages will be injected here -->
+      </div>
+      <form id="board-form" class="board-form">
+        <div class="board-inputs">
+          <input type="text" id="board-name" placeholder="名前 (省略可)" autocomplete="off" />
+          <input type="text" id="board-input" placeholder="メッセージを入力..." required autocomplete="off" />
+        </div>
+        <button type="submit">送信</button>
+      </form>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
