@@ -240,19 +240,42 @@ if (boardWidget) {
     boardToggle.textContent = boardWidget.classList.contains('minimized') ? '□' : '_';
   });
 
-  // Load messages from localStorage
-  const loadMessages = () => {
-    const msgs = JSON.parse(localStorage.getItem('pb_messages') || '[]');
-    boardMessages.innerHTML = '';
-    msgs.forEach(msg => appendMessage(msg.name || 'システム', msg.text, msg.time));
-    scrollToBottom();
+  // Load messages from Server (Fallback to localStorage)
+  const loadMessages = async () => {
+    try {
+      const res = await fetch('/api/messages');
+      if (!res.ok) throw new Error('API error or DB not configured');
+      const msgs = await res.json();
+      
+      boardMessages.innerHTML = '';
+      msgs.forEach(msg => appendMessage(msg.name || 'システム', msg.text, msg.time));
+      scrollToBottom();
+    } catch (e) {
+      // ローカル環境やKV未設定時のフォールバック
+      console.log('サーバーからの読み込みに失敗したため、ローカル保存のデータを表示します');
+      const msgs = JSON.parse(localStorage.getItem('pb_messages') || '[]');
+      boardMessages.innerHTML = '';
+      msgs.forEach(msg => appendMessage(msg.name || 'システム', msg.text, msg.time));
+      scrollToBottom();
+    }
   };
 
-  const saveMessage = (name, text, time) => {
-    const msgs = JSON.parse(localStorage.getItem('pb_messages') || '[]');
-    msgs.push({ name, text, time });
-    if (msgs.length > 50) msgs.shift(); // Keep last 50 messages
-    localStorage.setItem('pb_messages', JSON.stringify(msgs));
+  const saveMessage = async (name, text, time) => {
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, text, time })
+      });
+      if (!res.ok) throw new Error('API error or DB not configured');
+    } catch (e) {
+      // ローカル環境やKV未設定時のフォールバック
+      console.log('サーバーへの保存に失敗したため、ローカルに保存します');
+      const msgs = JSON.parse(localStorage.getItem('pb_messages') || '[]');
+      msgs.push({ name, text, time });
+      if (msgs.length > 50) msgs.shift(); // Keep last 50 messages
+      localStorage.setItem('pb_messages', JSON.stringify(msgs));
+    }
   };
 
   const getAnonymousId = () => {
