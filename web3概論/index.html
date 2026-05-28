@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>チェックリスト | My Checklist</title>
+  <meta name="description" content="シンプルで使いやすいチェックリストアプリ。タスクを追加してすべて完了したらOK！" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== リセット & ベース ===== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary:     #080808;
+      --bg-secondary:   #111111;
+      --bg-card:        #161616;
+      --bg-glass:       rgba(255,255,255,0.04);
+      --border:         rgba(255,255,255,0.08);
+      --border-hover:   rgba(255,255,255,0.18);
+      --accent:         #a78bfa;
+      --accent-dark:    #7c3aed;
+      --accent-glow:    rgba(167,139,250,0.35);
+      --success:        #34d399;
+      --success-glow:   rgba(52,211,153,0.35);
+      --error:          #f87171;
+      --error-glow:     rgba(248,113,113,0.35);
+      --text-primary:   #f0f0f0;
+      --text-secondary: #888888;
+      --text-muted:     #555555;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans JP', 'Outfit', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 80px;
+      overflow-x: hidden;
+    }
+
+    /* ===== 背景エフェクト ===== */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -150px;
+      right: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== コンテナ ===== */
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    /* ===== ヘッダー ===== */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-weight: 300;
+    }
+
+    /* ===== カード ===== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.3s;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+    }
+
+    /* ===== タイトル入力 ===== */
+    .list-title-wrap {
+      margin-bottom: 24px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    #listTitle {
+      width: 100%;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 1.1rem;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 500;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    #listTitle:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    #listTitle::placeholder { color: var(--text-muted); }
+
+    /* ===== アイテム追加エリア ===== */
+    .add-area {
+      display: flex;
+      gap: 10px;
+    }
+
+    #newItemInput {
+      flex: 1;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    #newItemInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    #newItemInput::placeholder { color: var(--text-muted); }
+
+    .btn-add {
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      color: #fff;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.25s, opacity 0.2s;
+      box-shadow: 0 4px 20px var(--accent-glow);
+      line-height: 1;
+    }
+
+    .btn-add:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 28px var(--accent-glow);
+    }
+
+    .btn-add:active { transform: scale(0.96); }
+
+    /* ===== 進捗バー ===== */
+    .progress-wrap {
+      margin: 20px 0 0;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--bg-glass);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+      transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .progress-bar-fill.complete {
+      background: linear-gradient(90deg, #059669, var(--success));
+      box-shadow: 0 0 10px var(--success-glow);
+    }
+
+    /* ===== チェックリスト ===== */
+    #checklist {
+      list-style: none;
+      margin-top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 0 24px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 2.4rem;
+      margin-bottom: 10px;
+      display: block;
+      opacity: 0.4;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      animation: slideIn 0.28s cubic-bezier(0.4,0,0.2,1);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .checklist-item:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: var(--border-hover);
+      transform: translateX(3px);
+    }
+
+    .checklist-item.checked {
+      background: rgba(52,211,153,0.06);
+      border-color: rgba(52,211,153,0.25);
+    }
+
+    /* カスタムチェックボックス */
+    .custom-checkbox {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+      background: transparent;
+    }
+
+    .checklist-item.checked .custom-checkbox {
+      background: var(--success);
+      border-color: var(--success);
+      box-shadow: 0 0 12px var(--success-glow);
+    }
+
+    .custom-checkbox .check-icon {
+      opacity: 0;
+      transform: scale(0.4);
+      transition: opacity 0.18s, transform 0.18s cubic-bezier(0.4,0,0.2,1);
+      color: #000;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .checklist-item.checked .custom-checkbox .check-icon {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .item-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      transition: color 0.2s, text-decoration 0.2s;
+      word-break: break-word;
+    }
+
+    .checklist-item.checked .item-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+      text-decoration-color: var(--text-muted);
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s, transform 0.15s;
+      line-height: 1;
+      opacity: 0;
+    }
+
+    .checklist-item:hover .btn-delete { opacity: 1; }
+    .btn-delete:hover {
+      color: var(--error);
+      background: rgba(248,113,113,0.1);
+      transform: scale(1.15);
+    }
+
+    /* ===== OKボタンエリア ===== */
+    .ok-area {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+
+    .item-count-badge {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .item-count-badge span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    #okBtn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      color: #fff;
+      box-shadow: 0 4px 30px var(--accent-glow);
+      transition: transform 0.18s, box-shadow 0.25s, opacity 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #okBtn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    #okBtn:hover::before { opacity: 1; }
+    #okBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px var(--accent-glow);
+    }
+    #okBtn:active { transform: translateY(0) scale(0.98); }
+
+    #okBtn.success-state {
+      background: linear-gradient(135deg, #059669, var(--success));
+      box-shadow: 0 4px 30px var(--success-glow);
+    }
+
+    /* ===== エラーメッセージ ===== */
+    #errorMsg {
+      display: none;
+      padding: 14px 18px;
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.35);
+      border-radius: 12px;
+      color: var(--error);
+      font-size: 0.9rem;
+      text-align: center;
+      animation: shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97);
+    }
+
+    #errorMsg.show { display: block; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      15%      { transform: translateX(-8px); }
+      30%      { transform: translateX(8px); }
+      45%      { transform: translateX(-6px); }
+      60%      { transform: translateX(6px); }
+      75%      { transform: translateX(-4px); }
+      90%      { transform: translateX(4px); }
+    }
+
+    /* ===== 成功オーバーレイ ===== */
+    #successOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+      padding: 24px;
+    }
+
+    #successOverlay.show {
+      display: flex;
+      animation: fadeIn 0.35s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .success-icon {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, #059669, var(--success));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      box-shadow: 0 0 60px var(--success-glow);
+      animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.3); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .success-sub {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    .btn-close-success {
+      margin-top: 8px;
+      padding: 12px 36px;
+      background: linear-gradient(135deg, #059669, var(--success));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 24px var(--success-glow);
+      transition: transform 0.18s, box-shadow 0.25s;
+    }
+
+    .btn-close-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--success-glow);
+    }
+
+    /* ===== フッター ===== */
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== レスポンシブ ===== */
+    @media (max-width: 480px) {
+      .card { padding: 20px 16px; }
+      h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- ヘッダー -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">✅</div>
+        <h1>My Checklist</h1>
+      </div>
+      <p class="subtitle">タスクをすべてチェックして完了しよう</p>
+    </header>
+
+    <!-- 設定カード -->
+    <div class="card">
+      <!-- リストタイトル -->
+      <div class="list-title-wrap">
+        <div class="section-label">リストのタイトル</div>
+        <input type="text" id="listTitle" placeholder="例：今日のタスク" maxlength="60" />
+      </div>
+
+      <!-- アイテム追加 -->
+      <div class="section-label">項目を追加</div>
+      <div class="add-area">
+        <input type="text" id="newItemInput" placeholder="新しい項目を入力…" maxlength="100" />
+        <button class="btn-add" id="addBtn" title="追加">＋</button>
+      </div>
+
+      <!-- 進捗バー -->
+      <div class="progress-wrap" id="progressWrap" style="display:none;">
+        <div class="progress-info">
+          <span>進捗</span>
+          <span id="progressText">0 / 0</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- チェックリストカード -->
+    <div class="card">
+      <div class="section-label">チェックリスト</div>
+      <ul id="checklist">
+        <li class="empty-state" id="emptyState">
+          <span class="empty-icon">📋</span>
+          まだ項目がありません。上のフォームから追加してください。
+        </li>
+      </ul>
+    </div>
+
+    <!-- OKエリア -->
+    <div class="ok-area">
+      <div class="item-count-badge" id="countBadge" style="display:none;">
+        <span id="checkedCount">0</span> / <span id="totalCount">0</span> 項目完了
+      </div>
+      <div id="errorMsg">⚠️ すべての項目をチェックしてから OK を押してください！</div>
+      <button id="okBtn">✓ &nbsp;OK — すべて完了！</button>
+    </div>
+  </div>
+
+  <!-- 成功オーバーレイ -->
+  <div id="successOverlay" role="dialog" aria-modal="true">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">完了！</div>
+    <div class="success-sub" id="successListTitle"></div>
+    <div class="success-sub">すべての項目をクリアしました 🚀</div>
+    <button class="btn-close-success" id="closeSuccessBtn">もう一度使う</button>
+  </div>
+
+  <footer>
+    &copy; 2026 My Checklist App
+  </footer>
+
+  <script>
+    // ===== 状態管理 =====
+    let items = [];   // { id, text, checked }
+    let nextId = 1;
+
+    // ===== DOM =====
+    const listTitle      = document.getElementById('listTitle');
+    const newItemInput   = document.getElementById('newItemInput');
+    const addBtn         = document.getElementById('addBtn');
+    const checklist      = document.getElementById('checklist');
+    const emptyState     = document.getElementById('emptyState');
+    const progressWrap   = document.getElementById('progressWrap');
+    const progressBar    = document.getElementById('progressBar');
+    const progressText   = document.getElementById('progressText');
+    const countBadge     = document.getElementById('countBadge');
+    const checkedCount   = document.getElementById('checkedCount');
+    const totalCount     = document.getElementById('totalCount');
+    const okBtn          = document.getElementById('okBtn');
+    const errorMsg       = document.getElementById('errorMsg');
+    const successOverlay = document.getElementById('successOverlay');
+    const successListTitle = document.getElementById('successListTitle');
+    const closeSuccessBtn  = document.getElementById('closeSuccessBtn');
+
+    // ===== Web Audio API（シングルトン・resume対応） =====
+    let _audioCtx = null;
+
+    function getAudioCtx() {
+      if (!_audioCtx) {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return _audioCtx;
+    }
+
+    function playWarningSound() {
+      try {
+        const ctx = getAudioCtx();
+        // suspended状態をresumeしてから音を鳴らす
+        ctx.resume().then(() => {
+          // 低音→中音→高音のビープ × 3
+          [0, 0.18, 0.36].forEach((startOffset, i) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(280 + i * 80, ctx.currentTime + startOffset);
+            gain.gain.setValueAtTime(0.25, ctx.currentTime + startOffset);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startOffset + 0.18);
+
+            osc.start(ctx.currentTime + startOffset);
+            osc.stop(ctx.currentTime + startOffset + 0.18);
+          });
+        });
+      } catch (e) {
+        console.warn('AudioContext not available:', e);
+      }
+    }
+
+    // ===== 成功音 =====
+    function playSuccessSound() {
+      try {
+        const ctx = getAudioCtx();
+        ctx.resume().then(() => {
+          const notes = [523, 659, 784, 1047]; // ド ミ ソ ド（高）
+          notes.forEach((freq, i) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.13);
+            gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.13);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.13 + 0.28);
+
+            osc.start(ctx.currentTime + i * 0.13);
+            osc.stop(ctx.currentTime + i * 0.13 + 0.28);
+          });
+        });
+      } catch (e) {
+        console.warn('AudioContext not available:', e);
+      }
+    }
+
+    // ===== レンダリング =====
+    function render() {
+      // リスト描画
+      checklist.innerHTML = '';
+
+      if (items.length === 0) {
+        checklist.appendChild(emptyState);
+        progressWrap.style.display = 'none';
+        countBadge.style.display   = 'none';
+        return;
+      }
+
+      progressWrap.style.display = 'block';
+      countBadge.style.display   = 'block';
+
+      const checked = items.filter(i => i.checked).length;
+      const total   = items.length;
+      const pct     = Math.round((checked / total) * 100);
+
+      progressBar.style.width = pct + '%';
+      progressText.textContent = `${checked} / ${total}`;
+      checkedCount.textContent = checked;
+      totalCount.textContent   = total;
+
+      if (pct === 100) {
+        progressBar.classList.add('complete');
+      } else {
+        progressBar.classList.remove('complete');
+      }
+
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'checklist-item' + (item.checked ? ' checked' : '');
+        li.dataset.id = item.id;
+
+        li.innerHTML = `
+          <div class="custom-checkbox">
+            <span class="check-icon">✓</span>
+          </div>
+          <span class="item-text">${escapeHtml(item.text)}</span>
+          <button class="btn-delete" title="削除" data-id="${item.id}">✕</button>
+        `;
+
+        // クリックでトグル（削除ボタン以外）
+        li.addEventListener('click', (e) => {
+          if (e.target.classList.contains('btn-delete')) return;
+          toggleItem(item.id);
+        });
+
+        // 削除
+        li.querySelector('.btn-delete').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteItem(item.id);
+        });
+
+        checklist.appendChild(li);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ===== アクション =====
+    function addItem() {
+      const text = newItemInput.value.trim();
+      if (!text) {
+        newItemInput.focus();
+        newItemInput.style.borderColor = 'var(--error)';
+        setTimeout(() => { newItemInput.style.borderColor = ''; }, 1200);
+        return;
+      }
+      items.push({ id: nextId++, text, checked: false });
+      newItemInput.value = '';
+      newItemInput.focus();
+      hideError();
+      render();
+    }
+
+    function toggleItem(id) {
+      const item = items.find(i => i.id === id);
+      if (item) item.checked = !item.checked;
+      hideError();
+      render();
+    }
+
+    function deleteItem(id) {
+      items = items.filter(i => i.id !== id);
+      render();
+    }
+
+    function hideError() {
+      errorMsg.classList.remove('show');
+    }
+
+    // ===== OKボタン =====
+    okBtn.addEventListener('click', () => {
+      if (items.length === 0) {
+        showError('項目がありません。まず項目を追加してください。');
+        playWarningSound();
+        return;
+      }
+      const allChecked = items.every(i => i.checked);
+      if (!allChecked) {
+        showError(null);
+        playWarningSound();
+        // シェイクアニメーション再生のため一度外して付け直す
+        errorMsg.style.animation = 'none';
+        requestAnimationFrame(() => {
+          errorMsg.style.animation = '';
+        });
+        return;
+      }
+      // 全チェック → 成功！
+      hideError();
+      playSuccessSound();
+      const title = listTitle.value.trim() || 'チェックリスト';
+      successListTitle.textContent = `「${title}」`;
+      successOverlay.classList.add('show');
+    });
+
+    function showError(msg) {
+      errorMsg.textContent = msg || '⚠️ すべての項目をチェックしてから OK を押してください！';
+      // アニメーションリセット
+      errorMsg.classList.remove('show');
+      void errorMsg.offsetWidth; // reflow
+      errorMsg.classList.add('show');
+    }
+
+    // ===== 成功オーバーレイを閉じる =====
+    closeSuccessBtn.addEventListener('click', () => {
+      successOverlay.classList.remove('show');
+      // リセット
+      items = [];
+      nextId = 1;
+      listTitle.value = '';
+      hideError();
+      render();
+    });
+
+    // ===== Enterキー対応 =====
+    newItemInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addItem();
+    });
+
+    addBtn.addEventListener('click', addItem);
+
+    // ===== 初期描画 =====
+    render();
+  </script>
+</body>
+</html>
