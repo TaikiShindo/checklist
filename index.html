@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>機種変更ログイン情報管理 | スマホ移行チェックリスト</title>
+  <meta name="description" content="スマホの機種変更時に必要なアプリのログイン情報（ID・パスワード）を一括管理し、PDFで出力できるWebアプリです。" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- Background Orbs -->
+<div class="bg-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- ===== Header ===== -->
+  <header class="header" role="banner">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">📱</div>
+        <div class="logo-text">
+          <h1>機種変更チェックリスト</h1>
+          <p>ログイン情報管理アプリ</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-screenshot" class="btn btn-secondary" title="スクリーンショットから解析">
+          <span>📸</span>
+          <span>AI解析</span>
+        </button>
+        <button id="btn-add" class="btn btn-primary" title="アプリを手動追加">
+          <span>＋</span>
+          <span>アプリ追加</span>
+        </button>
+        <button id="btn-pdf" class="btn btn-outline" title="PDFでダウンロード">
+          <span>📄</span>
+          <span>PDF出力</span>
+        </button>
+        <button id="btn-settings" class="btn btn-ghost btn-icon" title="設定" aria-label="設定">
+          ⚙️
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
+  <main class="main" role="main">
+
+    <!-- Stats -->
+    <div class="stats-bar" role="region" aria-label="統計情報">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total">0</div>
+        <div class="stat-label">登録アプリ数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-completed">0</div>
+        <div class="stat-label">確認済み</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-remaining">0</div>
+        <div class="stat-label">未確認</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-categories">0</div>
+        <div class="stat-label">カテゴリ数</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" role="region" aria-label="進捗">
+      <div class="progress-header">
+        <span class="progress-title">移行確認の進捗</span>
+        <span class="progress-pct" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar-bg" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="進捗バー">
+        <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="アプリ名で検索..."
+          aria-label="アプリ名で検索"
+        />
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs" role="tablist" aria-label="カテゴリフィルター" id="category-tabs">
+      <button class="cat-tab active" data-cat="all" role="tab" aria-selected="true" id="tab-all">
+        すべて <span class="count" id="count-all">0</span>
+      </button>
+      <button class="cat-tab" data-cat="SNS" role="tab" aria-selected="false" id="tab-sns">
+        📱 SNS <span class="count" id="count-sns">0</span>
+      </button>
+      <button class="cat-tab" data-cat="金融" role="tab" aria-selected="false" id="tab-finance">
+        💰 金融 <span class="count" id="count-finance">0</span>
+      </button>
+      <button class="cat-tab" data-cat="ショッピング" role="tab" aria-selected="false" id="tab-shopping">
+        🛒 ショッピング <span class="count" id="count-shopping">0</span>
+      </button>
+      <button class="cat-tab" data-cat="エンタメ" role="tab" aria-selected="false" id="tab-entertain">
+        🎮 エンタメ <span class="count" id="count-entertain">0</span>
+      </button>
+      <button class="cat-tab" data-cat="仕事" role="tab" aria-selected="false" id="tab-work">
+        💼 仕事 <span class="count" id="count-work">0</span>
+      </button>
+      <button class="cat-tab" data-cat="その他" role="tab" aria-selected="false" id="tab-other">
+        📦 その他 <span class="count" id="count-other">0</span>
+      </button>
+    </div>
+
+    <!-- Apps Grid -->
+    <div class="apps-grid" id="apps-grid" role="list" aria-label="アプリ一覧">
+      <!-- Cards are dynamically inserted here -->
+    </div>
+
+  </main>
+
+</div>
+
+<!-- ===================================================
+     Modal: アプリ追加/編集
+     =================================================== -->
+<div class="modal-overlay" id="modal-app" role="dialog" aria-modal="true" aria-labelledby="modal-app-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-app-title">アプリを追加</h2>
+      <button class="modal-close" id="modal-app-close" aria-label="閉じる">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label class="form-label" for="input-app-name">
+          アプリ名<span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          id="input-app-name"
+          class="form-input"
+          placeholder="例: LINE, Twitter, 楽天市場..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-category">カテゴリ</label>
+        <select id="input-category" class="form-select">
+          <option value="その他">📦 その他</option>
+          <option value="SNS">📱 SNS・コミュニケーション</option>
+          <option value="金融">💰 金融・ペイメント</option>
+          <option value="ショッピング">🛒 ショッピング・EC</option>
+          <option value="エンタメ">🎮 エンタメ・動画・音楽</option>
+          <option value="仕事">💼 仕事・ビジネス</option>
+        </select>
+      </div>
+
+      <div class="form-separator"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-id">
+          ID / メールアドレス
+        </label>
+        <input
+          type="text"
+          id="input-id"
+          class="form-input"
+          placeholder="ログインID またはメールアドレス"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-password">パスワード</label>
+        <div class="input-with-toggle">
+          <input
+            type="password"
+            id="input-password"
+            class="form-input"
+            placeholder="パスワードを入力"
+            autocomplete="new-password"
+          />
+          <button type="button" class="input-toggle-btn" id="toggle-input-pw" aria-label="パスワードを表示/非表示">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-memo">メモ</label>
+        <textarea
+          id="input-memo"
+          class="form-textarea"
+          placeholder="二段階認証の方法、秘密の質問など補足情報を入力"
+          rows="3"
+        ></textarea>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="modal-app-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="modal-app-save">💾 保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     Modal: スクリーンショット解析
+     =================================================== -->
+<div class="modal-overlay" id="modal-screenshot" role="dialog" aria-modal="true" aria-labelledby="modal-ss-title">
+  <div class="modal" style="max-width: 600px;">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-ss-title">📸 スクリーンショットから解析</h2>
+      <button class="modal-close" id="modal-ss-close" aria-label="閉じる">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- API Key -->
+      <div class="api-key-section">
+        <div class="api-key-title">
+          🔑 Gemini API Key
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="api-key-link">
+            → 無料で取得する
+          </a>
+        </div>
+        <div class="input-with-toggle">
+          <input
+            type="password"
+            id="input-api-key"
+            class="form-input"
+            placeholder="AIzaSy..."
+            autocomplete="off"
+          />
+          <button type="button" class="input-toggle-btn" id="toggle-api-key" aria-label="APIキーを表示/非表示">
+            👁️
+          </button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+          APIキーはブラウザのローカルストレージに保存されます。外部に送信されません。
+        </p>
+      </div>
+
+      <!-- Model Selection -->
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label" for="select-model">
+          🤖 使用するモデル
+          <span style="font-size: 11px; color: var(--accent-warning); font-weight: 400; margin-left: 8px;">
+            ※ クォータエラーの場合は変更してください
+          </span>
+        </label>
+        <select id="select-model" class="form-select">
+          <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B（軽量・無料枠多め ★推奨）</option>
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash（安定版）</option>
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash（最新）</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro（高精度）</option>
+        </select>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+          💡 無料枠エラーが出た場合は <strong style="color: var(--accent-primary);">Gemini 1.5 Flash-8B</strong> が最も多くリクエストできます
+        </p>
+      </div>
+
+      <!-- Upload Zone -->
+      <div id="upload-zone" class="upload-zone" role="button" aria-label="スクリーンショットをアップロード">
+        <input type="file" id="file-input" accept="image/*" multiple aria-label="画像ファイルを選択" />
+        <span class="upload-icon" aria-hidden="true">📱</span>
+        <div class="upload-title">スクリーンショットをドロップ</div>
+        <div class="upload-desc">またはクリックして選択（複数可）<br>アプリ一覧のスクリーンショットを使用してください</div>
+      </div>
+
+      <!-- Preview -->
+      <div class="upload-preview" id="upload-preview">
+        <img id="preview-img" src="" alt="アップロードされた画像のプレビュー" />
+      </div>
+
+      <!-- Analyzing State -->
+      <div class="analyzing-state" id="analyzing-state" style="display: none;">
+        <div class="analyzing-spinner" aria-label="解析中"></div>
+        <p style="color: var(--text-secondary); font-size: 14px;">AIがアプリを解析中...</p>
+      </div>
+
+      <!-- Results -->
+      <div id="extracted-result" style="display: none; margin-top: 20px;">
+        <p style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">
+          見つかったアプリ — 追加するものを選択してください
+        </p>
+        <div class="extracted-list" id="extracted-list" role="group" aria-label="検出されたアプリ一覧">
+          <!-- Extracted app items inserted here -->
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="modal-ss-cancel">キャンセル</button>
+      <button class="btn btn-outline" id="btn-analyze" style="display: none;">
+        🔍 解析する
+      </button>
+      <button class="btn btn-primary" id="btn-add-extracted" style="display: none;">
+        ✅ 選択したアプリを追加
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     Modal: 設定
+     =================================================== -->
+<div class="modal-overlay" id="modal-settings" role="dialog" aria-modal="true" aria-labelledby="modal-settings-title">
+  <div class="modal" style="max-width: 460px;">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-settings-title">⚙️ 設定</h2>
+      <button class="modal-close" id="modal-settings-close" aria-label="閉じる">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label class="form-label">Gemini API Key（保存済み）</label>
+        <div class="input-with-toggle">
+          <input
+            type="password"
+            id="settings-api-key"
+            class="form-input"
+            placeholder="APIキーを入力して保存"
+            autocomplete="off"
+          />
+          <button type="button" class="input-toggle-btn" id="toggle-settings-api-key" aria-label="APIキーを表示/非表示">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-info">
+        <p>
+          📌 Gemini API Key は
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">
+            Google AI Studio
+          </a>
+          で無料取得できます。<br><br>
+          取得後、「AI解析」ボタンからスクリーンショットを解析できます。
+          APIキーはこのブラウザのみに保存され、外部のサーバーには送信されません。
+        </p>
+      </div>
+
+      <div class="form-separator"></div>
+
+      <div class="form-group">
+        <label class="form-label">データ管理</label>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-outline btn-sm" id="btn-export">📤 JSONエクスポート</button>
+          <button class="btn btn-ghost btn-sm" id="btn-import-trigger">📥 JSONインポート</button>
+          <input type="file" id="btn-import" accept=".json" style="display: none;" aria-label="JSONファイルを選択" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <button class="btn btn-danger" id="btn-clear-all" style="width: 100%; justify-content: center;">
+          🗑️ すべてのデータを削除
+        </button>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="modal-settings-cancel">閉じる</button>
+      <button class="btn btn-primary" id="btn-save-settings">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-label="通知"></div>
+
+<!-- App Script -->
+<script src="app.js"></script>
+</body>
+</html>
