@@ -12,10 +12,10 @@ const API_MODEL_STORAGE = 'kishine_gemini_model';
 
 // 利用可能なGeminiモデル一覧
 const GEMINI_MODELS = [
-  { value: 'gemini-2.0-flash',       label: 'Gemini 2.0 Flash（最新・推奨）' },
-  { value: 'gemini-1.5-flash',       label: 'Gemini 1.5 Flash（安定版）' },
-  { value: 'gemini-1.5-flash-8b',    label: 'Gemini 1.5 Flash-8B（軽量・無料枠多め）' },
-  { value: 'gemini-1.5-pro',         label: 'Gemini 1.5 Pro（高精度）' },
+  { value: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash（推奨）' },
+  { value: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash-Lite（軽量）' },
+  { value: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash（高精度）' },
+  { value: 'gemini-2.5-pro',        label: 'Gemini 2.5 Pro（最高精度）' },
 ];
 
 const CATEGORIES = ['SNS', '金融', 'ショッピング', 'エンタメ', '仕事', 'その他'];
@@ -67,7 +67,7 @@ function saveModel(model) {
 }
 
 function loadModel() {
-  return localStorage.getItem(API_MODEL_STORAGE) || 'gemini-1.5-flash';
+  return localStorage.getItem(API_MODEL_STORAGE) || 'gemini-2.0-flash';
 }
 
 // ===========================
