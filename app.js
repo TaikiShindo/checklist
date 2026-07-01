@@ -940,7 +940,24 @@ function bindEvents() {
 // ===========================
 // Initialize
 // ===========================
+// 廃止されたモデル名リスト
+const DEPRECATED_MODELS = [
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-pro',
+  'gemini-1.0-pro',
+];
+
+function migrateDeprecatedModel() {
+  const saved = localStorage.getItem(API_MODEL_STORAGE);
+  if (saved && DEPRECATED_MODELS.includes(saved)) {
+    console.warn(`[移行] 廃止されたモデル "${saved}" を "gemini-2.0-flash" に自動変更しました。`);
+    localStorage.setItem(API_MODEL_STORAGE, 'gemini-2.0-flash');
+  }
+}
+
 function init() {
+  migrateDeprecatedModel(); // 廃止モデルを自動リセット
   loadApps();
   bindEvents();
   fullRender();
