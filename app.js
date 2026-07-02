@@ -417,7 +417,15 @@ function openScreenshotModal() {
   openModal('modal-screenshot');
 }
 
+let isAnalyzing = false; // 二重送信防止フラグ
+
 async function analyzeScreenshot() {
+  // 二重送信防止
+  if (isAnalyzing) {
+    console.warn('[analyzeScreenshot] すでに解析中のため無視しました');
+    return;
+  }
+  isAnalyzing = true;
   const apiKey = document.getElementById('input-api-key').value.trim();
   if (!apiKey) {
     showToast('Gemini API Keyを入力してください', 'error');
@@ -527,15 +535,11 @@ async function analyzeScreenshot() {
     // 改行を含むエラーメッセージをトースト表示
     const shortMsg = err.message.split('\n')[0];
     showToast(`エラー: ${shortMsg}`, 'error', 6000);
-    // 詳細をコンソールとアラートで確認できるよう
+    // 詳細をコンソールで確認できるよう
     console.error('[Gemini API Error]', err.message);
-    if (err.message.includes('無料枠')) {
-      // 少し遅らせてアラート（トーストが見えるように）
-      setTimeout(() => alert(
-        '【Gemini APIエラー】\n\n' + err.message +
-        '\n\n▶ モデルを「Gemini 1.5 Flash-8B」に変更して再試行してください。'
-      ), 500);
-    }
+  } finally {
+    // 必ずフラグをリセット（二重送信防止解除）
+    isAnalyzing = false;
   }
 }
 
