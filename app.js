@@ -12,10 +12,10 @@ const API_MODEL_STORAGE = 'kishine_gemini_model';
 
 // 利用可能なGeminiモデル一覧
 const GEMINI_MODELS = [
-  { value: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash（推奨）' },
-  { value: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash-Lite（軽量）' },
-  { value: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash（高精度）' },
+  { value: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash（最新・推奨 ★）' },
   { value: 'gemini-2.5-pro',        label: 'Gemini 2.5 Pro（最高精度）' },
+  { value: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash（安定版）' },
+  { value: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash-Lite（軽量）' },
 ];
 
 const CATEGORIES = ['SNS', '金融', 'ショッピング', 'エンタメ', '仕事', 'その他'];
@@ -67,7 +67,7 @@ function saveModel(model) {
 }
 
 function loadModel() {
-  return localStorage.getItem(API_MODEL_STORAGE) || 'gemini-2.0-flash';
+  return localStorage.getItem(API_MODEL_STORAGE) || 'gemini-2.5-flash';
 }
 
 // ===========================
@@ -978,8 +978,8 @@ const DEPRECATED_MODELS = [
 function migrateDeprecatedModel() {
   const saved = localStorage.getItem(API_MODEL_STORAGE);
   if (saved && DEPRECATED_MODELS.includes(saved)) {
-    console.warn(`[移行] 廃止されたモデル "${saved}" を "gemini-2.0-flash" に自動変更しました。`);
-    localStorage.setItem(API_MODEL_STORAGE, 'gemini-2.0-flash');
+    console.warn(`[移行] 廃止されたモデル "${saved}" を "gemini-2.5-flash" に自動変更しました。`);
+    localStorage.setItem(API_MODEL_STORAGE, 'gemini-2.5-flash');
   }
 }
 
