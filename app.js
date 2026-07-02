@@ -586,21 +586,44 @@ function handleFileSelect(file) {
   }
   const reader = new FileReader();
   reader.onload = (e) => {
-    const dataUrl = e.target.result;
-    const base64 = dataUrl.split(',')[1];
-    state.uploadedImageBase64 = base64;
-    state.uploadedImageMimeType = file.type;
+    const img = new Image();
+    img.onload = () => {
+      // 360p相当にリサイズ (スマートフォンの縦長画面を想定し、横幅を360pxに固定してアスペクト比を維持)
+      const targetWidth = 360;
+      const scaleFactor = targetWidth / img.width;
+      const targetHeight = img.height * scaleFactor;
 
-    // Show preview
-    const preview = document.getElementById('upload-preview');
-    const img = document.getElementById('preview-img');
-    img.src = dataUrl;
-    preview.style.display = 'block';
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
 
-    // Show analyze button
-    document.getElementById('btn-analyze').style.display = 'inline-flex';
-    document.getElementById('extracted-result').style.display = 'none';
-    document.getElementById('btn-add-extracted').style.display = 'none';
+      const ctx = canvas.getContext('2d');
+      // 画像を滑らかに縮小するための設定
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+      // JPEG形式で圧縮（画質0.85）してBase64化
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const base64 = compressedDataUrl.split(',')[1];
+
+      state.uploadedImageBase64 = base64;
+      state.uploadedImageMimeType = 'image/jpeg';
+
+      // プレビュー表示
+      const preview = document.getElementById('upload-preview');
+      const previewImg = document.getElementById('preview-img');
+      previewImg.src = compressedDataUrl; // 圧縮後の画像を表示
+      preview.style.display = 'block';
+
+      // 解析ボタンを表示
+      document.getElementById('btn-analyze').style.display = 'inline-flex';
+      document.getElementById('extracted-result').style.display = 'none';
+      document.getElementById('btn-add-extracted').style.display = 'none';
+
+      console.log(`[リサイズ] ${img.width}x${img.height} から ${targetWidth}x${Math.round(targetHeight)} に圧縮しました。`);
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
